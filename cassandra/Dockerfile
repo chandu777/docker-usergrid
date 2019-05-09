@@ -5,6 +5,8 @@ MAINTAINER chandrakant
 
 ENV CASSANDRA_CONFIG /etc/cassandra
 
+RUN groupadd -r cassandra --gid=999 && useradd -r -g cassandra --uid=999 cassandra
+
 RUN \
   cd /etc && \
   wget https://www.apache.org/dist/cassandra/2.1.21/apache-cassandra-2.1.21-bin.tar.gz && \
@@ -23,6 +25,9 @@ COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 RUN ln -s usr/local/bin/docker-entrypoint.sh /docker-entrypoint.sh # backwards compat
 
 RUN mkdir -p /var/lib/cassandra "$CASSANDRA_CONFIG" /var/log/cassandra /var/log/supervisor
+
+RUN chown -R cassandra:cassandra /var/lib/cassandra "$CASSANDRA_CONFIG" \
+    && chmod 777 /var/lib/cassandra "$CASSANDRA_CONFIG"
 
 VOLUME /var/lib/cassandra
 

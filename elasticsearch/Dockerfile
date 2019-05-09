@@ -4,6 +4,8 @@ FROM yep1/usergrid-java
 
 MAINTAINER chandrakant
 
+RUN groupadd -r elasticsearch --gid=999 && useradd -r -g elasticsearch --uid=999 elasticsearch
+
 ENV ES_PKG_NAME elasticsearch-1.7.6
 ENV CONFIG_FILE=/elasticsearch/config/elasticsearch.yml
 
@@ -17,6 +19,8 @@ RUN \
   rm -f $ES_PKG_NAME.tar.gz && \
   mv /$ES_PKG_NAME /elasticsearch
   #sed -i -e "s/#cluster.name: elasticsearch/cluster.name: $ES_CLUSTER_NAME/" $CONFIG_FILE
+RUN chown -R elasticsearch:elasticsearch /elasticsearch \
+    && chmod 777 /elasticsearch
 
 RUN sed -i'' 's/archive\.ubuntu\.com/\old-releases\.ubuntu\.com/' /etc/apt/sources.list
 RUN apt-get update && apt-get install -y supervisor
