@@ -1,7 +1,10 @@
 #!/bin/bash
 USERGRID_PROPERTIES_FILE=/tomcat/lib/usergrid-deployment.properties
 
-sed -i "s/cassandra.url=xxxx/cassandra.url=${CASSANDRA_URL}/g" $USERGRID_PROPERTIES_FILE
-sed -i "s/elasticsearch.hosts=xxxx/elasticsearch.hosts=${ELASTICSEARCH_HOST}/g" $USERGRID_PROPERTIES_FILE
+env | grep ug_* > data.dat
+sed 's/ug_//g' data.dat > data_ug.dat
+while IFS='=' read -r key value; do
+sed -i 's/'"$key"'=.*/'"$key"'='"$value"'/g' ${USERGRID_PROPERTIES_FILE}
+done < data_ug.dat
 
 exec "$@"

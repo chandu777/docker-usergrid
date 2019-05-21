@@ -1,33 +1,21 @@
 # docker file for usergrid deployed in tomcat
 
-FROM yep1/usergrid-java
+FROM ca03430/ubuntu18:java
 
 MAINTAINER chandrakant
 
+RUN groupadd -r usergrid --gid=999 && useradd -r -g usergrid --uid=999 usergrid
+
 WORKDIR /root
-ENV JAVA_HOME /usr/lib/jvm/java-8-oracle
+ENV JAVA_HOME /usr/lib/jvm/jdk1.8.0_211
 
 RUN \
-  sed -i'' 's/archive\.ubuntu\.com/\old-releases\.ubuntu\.com/' /etc/apt/sources.list && \
+  #sed -i'' 's/archive\.ubuntu\.com/\old-releases\.ubuntu\.com/' /etc/apt/sources.list && \
   echo "+++ install tomcat and packages required for compilation" && \ 
   apt-get update && \
-  apt-get install -y maven curl supervisor openssh-server git-core && \
+  apt-get install -y wget maven curl supervisor openssh-server git-core && \
   mkdir -p /var/log/supervisor && \
   mkdir -p /var/run/sshd && \
-  \
-# get usergrid from git and make build && \
-  git clone --single-branch --branch master https://github.com/apache/usergrid.git usergrid && \
-  cd usergrid/sdks && \
-  rm -rf java && \
-  git clone https://github.com/apache/usergrid-java.git && \
-  mv usergrid-java java && \
-  cd java && \
-  mvn clean install -DskipTests && \
-  cd ../../stack/ && \
-  mvn clean install -DskipTests && \
-  cp rest/target/ROOT.war /root/ && \
-  rm -rf /root/usergrid && \
-  \
 # add pwd to file
   echo 'root:root' | chpasswd && \
   sed -i 's/PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config && \
@@ -43,13 +31,23 @@ RUN \
   tar xvzf apache-tomcat-7.0.85.tar.gz && \
   rm -f apache-tomcat-7.0.85.tar.gz && \
   mv /apache-tomcat-7.0.85 /tomcat && \
-  rm -rf /tomcat/webapps/* && \
-  cp /root/ROOT.war /tomcat/webapps/
+  rm -rf /tomcat/webapps/*
+  #cp /root/ROOT.war /tomcat/webapps/
 
+ADD portal.tar /tomcat/webapps/
+COPY ROOT.war /tomcat/webapps/
 COPY tomcat-entrypoint.sh /root/tomcat-entrypoint.sh
 COPY usergrid-deployment.properties /tomcat/lib/
 COPY user-creation-script.sh /root/user-creation-script.sh
-RUN chmod 377 /root/user-creation-script.sh /root/user-creation-script.sh /tomcat/lib/usergrid-deployment.properties
+RUN mv /tomcat/webapps/usergrid-portal.2.0.18 /tomcat/webapps/portal && \
+    chown -R usergrid:usergrid /root /tomcat && \
+    chmod 733 -R /tomcat /root
+
+#chmod 733 /root/user-creation-script.sh && \
+#    chmod 733 -R /tomcat && \ 
+#    chown -R usergrid:usergrid /tomcat && \
+#    chown usergrid:usergrid /root/user-creation-script.sh
+
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 ENTRYPOINT ["/root/tomcat-entrypoint.sh"]

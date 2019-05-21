@@ -3,7 +3,7 @@
 while [ -z "$(curl -s localhost:8080/status | grep '"cassandraAvailable" : true')" ] ;
 do
   echo "+++ tomcat log:"
-  tail -n 20 /tomcat/logs/catalina.out
+  tail -n 20 /tomcat/logs/catalina*
   echo "+++ waiting for cassandra being available to usergrid"
   sleep 2
 done
