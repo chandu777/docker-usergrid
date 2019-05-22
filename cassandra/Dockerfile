@@ -1,5 +1,5 @@
 # docker file for usergrid cassandra
-FROM yep1/usergrid-java
+FROM ca03430/ubuntu18:java
 
 MAINTAINER chandrakant
 
@@ -7,18 +7,18 @@ ENV CASSANDRA_CONFIG /etc/cassandra
 
 RUN groupadd -r cassandra --gid=999 && useradd -r -g cassandra --uid=999 cassandra
 
+#RUN sed -i'' 's/archive\.ubuntu\.com/\old-releases\.ubuntu\.com/' /etc/apt/sources.list
+RUN \
+  echo "+++ install python supervisor wget" && \
+  apt-get update && \
+  apt-get install -y python supervisor wget
+
 RUN \
   cd /etc && \
   wget https://www.apache.org/dist/cassandra/2.1.21/apache-cassandra-2.1.21-bin.tar.gz && \
   tar xvzf apache-cassandra-2.1.21-bin.tar.gz && \
   rm -f apache-cassandra-2.1.21-bin.tar.gz && \
   mv /etc/apache-cassandra-2.1.21 /etc/cassandra
-
-RUN sed -i'' 's/archive\.ubuntu\.com/\old-releases\.ubuntu\.com/' /etc/apt/sources.list
-RUN \
-  echo "+++ install python" && \
-  apt-get update && \
-  apt-get install -y python supervisor
 
 COPY docker-entrypoint.sh /usr/local/bin/
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf

@@ -31,15 +31,15 @@ if [ $SEEDS ]; then
  fi
 fi
 
-if [ $Endpoint_Snitch ]; then
- echo "Endpoint Snitch : "$Endpoint_Snitch
- if [ $Endpoint_Snitch == "GossipingPropertyFileSnitch" ]; then
+if [ $ENDPOINT_SNITCH ]; then
+ echo "Endpoint Snitch : "$ENDPOINT_SNITCH
+ if [ $ENDPOINT_SNITCH == "GossipingPropertyFileSnitch" ]; then
   if [ $DC_NAME ] && [ $RACK_NAME ]; then
    echo "DC name : " $DC_NAME
    sed -i -e "s/dc=DC1/dc=${DC_NAME}/" ${CASSANDRA_RACKDC_PROP}
    echo "RACK name : " $RACK_NAME
    sed -i -e "s/rack=RAC1/rack=${RACK_NAME}/" ${CASSANDRA_RACKDC_PROP}
-   sed -i -e "s/endpoint_snitch: SimpleSnitch/endpoint_snitch: $Endpoint_Snitch/" ${CONFIG_FILE}
+   sed -i -e "s/endpoint_snitch: SimpleSnitch/endpoint_snitch: $ENDPOINT_SNITCH/" ${CONFIG_FILE}
   fi
  fi
 fi

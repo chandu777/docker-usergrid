@@ -1,6 +1,6 @@
 # Elasticsearch Dockerfile for Usergrid
 
-FROM yep1/usergrid-java
+FROM ca03430/ubuntu18:java
 
 MAINTAINER chandrakant
 
@@ -10,6 +10,10 @@ ENV ES_PKG_NAME elasticsearch-1.7.6
 ENV CONFIG_FILE=/elasticsearch/config/elasticsearch.yml
 
 WORKDIR /root
+
+#RUN sed -i'' 's/archive\.ubuntu\.com/\old-releases\.ubuntu\.com/' /etc/apt/sources.list
+RUN apt-get update && apt-get install -y supervisor wget curl
+RUN mkdir -p /var/log/supervisor
 
 # install elasticsearch
 RUN \
@@ -22,9 +26,6 @@ RUN \
 RUN chown -R elasticsearch:elasticsearch /elasticsearch \
     && chmod 777 /elasticsearch
 
-RUN sed -i'' 's/archive\.ubuntu\.com/\old-releases\.ubuntu\.com/' /etc/apt/sources.list
-RUN apt-get update && apt-get install -y supervisor
-RUN mkdir -p /var/log/supervisor
 COPY entrypoint-elasticsearch.sh /root/entrypoint-elasticsearch.sh
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
