@@ -1,10 +1,12 @@
 #!/bin/bash
 
-while [ -z "$(curl -s localhost:8080/status | grep '"cassandraAvailable" : true')" ] ;
+while [ -z "$(curl -s localhost:8080/status | grep '"managementAppIndexStatus" : "GREEN"')" ] || [ -z "$(curl -s localhost:8080/status | grep '"cassandraStatus" : "GREEN"')" ];
 do
   echo "+++ tomcat log:"
   tail -n 20 /tomcat/logs/catalina*
   echo "+++ waiting for cassandra being available to usergrid"
+  echo $(curl -s localhost:8080/status | grep '"managementAppIndexStatus"')
+  echo $(curl -s localhost:8080/status | grep '"cassandraStatus"')
   sleep 2
 done
 

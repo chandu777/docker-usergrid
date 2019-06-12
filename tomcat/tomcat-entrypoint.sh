@@ -1,5 +1,5 @@
 #!/bin/bash
-USERGRID_PROPERTIES_FILE=/tomcat/lib/usergrid-deployment.properties
+USERGRID_PROPERTIES_FILE=$TOMCAT_HOME/lib/usergrid-deployment.properties
 
 env | grep ug_* > data.dat
 sed 's/ug_//g' data.dat > data_ug.dat

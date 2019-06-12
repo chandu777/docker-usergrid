@@ -1,9 +1,9 @@
 #!/bin/bash
-cassandra_home=$CASSANDRA_CONFIG;
-CONFIG_FILE=/etc/cassandra/conf/cassandra.yaml
-CASSANDRA_RACKDC_PROP=/etc/cassandra/conf/cassandra-rackdc.properties
-CASSANDRA_TOPOLOGY_PROP=/etc/cassandra/conf/cassandra-topology.properties
-CASSANDRA_TOPOLOGY_YAML=/etc/cassandra/conf/cassandra-topology.yaml
+CASSANDRA_HOME=$CASSANDRA_CONFIG;
+CONFIG_FILE=$CASSANDRA_HOME/conf/cassandra.yaml
+CASSANDRA_RACKDC_PROP=$CASSANDRA_HOME/conf/cassandra-rackdc.properties
+#CASSANDRA_TOPOLOGY_PROP=$CASSANDRA_HOME/conf/cassandra-topology.properties
+#CASSANDRA_TOPOLOGY_YAML=$CASSANDRA_HOME/conf/cassandra-topology.yaml
 
 CASSANDRA_BROADCAST_RPC_ADDRESS=$(hostname --ip-address)
 CASSANDRA_RPC_ADDRESS=$(hostname --ip-address)
@@ -22,26 +22,22 @@ if [ $CLUSTER_NAME ]; then
 fi
 
 if [ $SEEDS ]; then
- if [ $SEEDS == "default" ]; then
-  echo "cassandra default seeds :" $CASSANDRA_SEEDS
-  sed -i -e "s/^\([ ]*- seeds:\).*/\1 ${CASSANDRA_SEEDS}/" ${CONFIG_FILE} 
- else
-  echo "cassandra seeds :" $SEEDS
-  sed -i -e "s/^\([ ]*- seeds:\).*/\1 ${SEEDS}/" ${CONFIG_FILE}
- fi
+ echo "cassandra seeds :" $SEEDS
+ sed -i -e "s/^\([ ]*- seeds:\).*/\1 ${SEEDS}/" ${CONFIG_FILE}
+else
+ echo "cassandra default seeds :" $CASSANDRA_SEEDS
+ sed -i -e "s/^\([ ]*- seeds:\).*/\1 ${CASSANDRA_SEEDS}/" ${CONFIG_FILE} 
 fi
 
 if [ $ENDPOINT_SNITCH ]; then
  echo "Endpoint Snitch : "$ENDPOINT_SNITCH
- if [ $ENDPOINT_SNITCH == "GossipingPropertyFileSnitch" ]; then
-  if [ $DC_NAME ] && [ $RACK_NAME ]; then
-   echo "DC name : " $DC_NAME
-   sed -i -e "s/dc=DC1/dc=${DC_NAME}/" ${CASSANDRA_RACKDC_PROP}
-   echo "RACK name : " $RACK_NAME
-   sed -i -e "s/rack=RAC1/rack=${RACK_NAME}/" ${CASSANDRA_RACKDC_PROP}
-   sed -i -e "s/endpoint_snitch: SimpleSnitch/endpoint_snitch: $ENDPOINT_SNITCH/" ${CONFIG_FILE}
-  fi
- fi
+ sed -i -e "s/endpoint_snitch: SimpleSnitch/endpoint_snitch: $ENDPOINT_SNITCH/" ${CONFIG_FILE}   
+ echo "DC name : " $DC_NAME
+ sed -i -e "s/dc=DC1/dc=${DC_NAME}/" ${CASSANDRA_RACKDC_PROP}
+ echo "RACK name : " $RACK_NAME
+ sed -i -e "s/rack=RAC1/rack=${RACK_NAME}/" ${CASSANDRA_RACKDC_PROP}
+ sed -i -e "s/endpoint_snitch: SimpleSnitch/endpoint_snitch: $ENDPOINT_SNITCH/" ${CONFIG_FILE}
 fi
+
 exec "$@"
 
